@@ -1,0 +1,63 @@
+
+NAME = bomberman
+CC = clang++
+CFLAGS = -std=c++11
+#  -Wall -Werror -Wextra
+
+DSRC = ./src/
+DOBJ = ./obj/
+LIB = ./lib/
+
+IDIR = 	-I./includes \
+		-I./lib/assimp-4.1.0/include \
+		-I./lib/glm \
+		-I./lib/glew-2.1.0/include\
+		-I./lib/glfw-3.2.1/include\
+		-I./lib/stb_image\
+		-I./lib/freetype/include/\
+		-I./lib/freetype/include/freetype/
+
+ASSIMP_PATH = -rpath ./lib/assimp-4.1.0/lib
+ASSIMP = -L./lib/assimp-4.1.0/lib -lassimp
+GLFW =  -L./lib/glfw-3.2.1/src -lglfw3 
+GLEW = -L./lib/glew-2.1.0/lib ./lib/glew-2.1.0/lib/libGLEW.a
+STB_IMAGE = ./lib/stb_image/stb_image.cpp
+FREETYPE = ./lib/freetype/build/libfreetype.a
+SOIL = ./lib/SOIL/libSOIL.a
+OPENAL = -L./lib/open_al/ -lopenal
+ALUT = -L./lib/alut/src/ -lalut
+FW = -framework Cocoa -framework OpenGL -framework IOKit -framework CoreVideo -L/Library/Frameworks
+
+SRC = main.cpp Mesh.cpp InstancedMesh.cpp Model.cpp Shader.cpp Texture.cpp Game.cpp Camera.cpp\
+	Maze.cpp Enemy.cpp Player.cpp Maze_solver.cpp GamePlay.cpp Weapon.cpp Timer.cpp\
+
+
+OBJ	= $(addprefix $(DOBJ),$(SRC:.cpp=.o))  
+
+all : load_lib obj $(NAME)
+
+load_lib : 
+	@sh load_libraries.sh
+
+obj :
+	@mkdir -p $(DOBJ)
+
+$(NAME) : $(OBJ)
+	@$(CC) $(OBJ) $(STB_IMAGE) -o $(NAME) $(FW) $(ASSIMP_PATH) $(ASSIMP) $(GLFW) $(GLEW) $(OPENAL) $(ALUT) $(FREETYPE) $(SOIL)
+
+$(DOBJ)%.o: $(DSRC)%.cpp
+	@$(CC) $(IDIR) $(CFLAGS) -c -o $@ $<
+	@echo "Compiling.."  $<
+
+clean:
+	@echo "Cleaning.."
+	@rm -rf $(DOBJ)
+
+fclean: clean
+	@echo "Cleaning.."
+	@rm -rf $(NAME)
+
+clean_all: fclean
+	@rm -rf $(LIB)
+
+re: fclean all
